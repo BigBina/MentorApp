@@ -2,7 +2,7 @@
 attachments: [Screen Shot 2021-10-05 at 11.12.46 PM.png]
 title: CLLocationManger
 created: '2021-10-06T04:04:36.578Z'
-modified: '2021-10-07T22:36:33.982Z'
+modified: '2021-10-09T15:32:00.716Z'
 ---
 
 # CLLocationManger
@@ -52,6 +52,9 @@ extension LocationView: CLLocationManagerDelegate, UITextFieldDelegate{
         }
     }
 ```
+This processRespone function is where you specify which Placemark attributes you would like to access from the CLLocation. Reference to all the possible attributes: [**CLPlacemark**](https://developer.apple.com/documentation/corelocation/clplacemark)
+In this function, I only requested the State and City of my current location. I also added a conditional if the fields are not filled out, then we prompt an error alert.
+
 ```swift
     public func processResponse(withPlacemarks placemarks: [CLPlacemark]?, error: Error?) {
         // Update View
