@@ -17,6 +17,7 @@ class RegisterView: UIViewController {
     @IBOutlet weak var confirmPasswordField: UITextField!
     @IBOutlet weak var phoneNumberField: UITextField!
 
+    @IBOutlet weak var nextButton: UIButton!
     @IBOutlet weak var errorField: UILabel!
     
 
@@ -24,7 +25,9 @@ class RegisterView: UIViewController {
         super.viewDidLoad()
         hideKeyboardWhenTappedAround()
         // Do any additional setup after loading the view.
+        nextButton.layer.cornerRadius = 20
     }
+    
     
     @IBAction func nextButton(_ sender: Any) {
  

@@ -13,6 +13,7 @@ class LocationView: UIViewController {
     @IBOutlet weak var cityField: UITextField!
     @IBOutlet weak var stateField: UITextField!
     @IBOutlet weak var errorLabel: UILabel!
+    @IBOutlet weak var nextButton: UIButton!
     
     var pickerView = UIPickerView()
     let locationManager = CLLocationManager()
@@ -36,6 +37,10 @@ class LocationView: UIViewController {
         
         //Location Initializers
         locationManager.delegate = self
+        
+        //Button Attributes
+        nextButton.layer.cornerRadius = 20
+        
      
         
     }
