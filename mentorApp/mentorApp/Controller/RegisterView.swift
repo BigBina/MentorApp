@@ -27,6 +27,16 @@ class RegisterView: UIViewController {
         // Do any additional setup after loading the view.
         nextButton.layer.cornerRadius = 20
     }
+ 
+    var profile : Profile = Profile(firstName: "", lastName: "", phoneNumber: "", city: "", state: "", bio: "", type: "", career: "", categories: [])
+    
+    private func myDate() -> String{
+        let dateFormatter = DateFormatter()
+        let currentDate = Date()
+        dateFormatter.dateFormat = "h:mm a - MM/d/yy"
+        let jDate = dateFormatter.string(from: currentDate)
+        return jDate
+    }
     
     
     @IBAction func nextButton(_ sender: Any) {
@@ -40,12 +50,28 @@ class RegisterView: UIViewController {
                         print(e.localizedDescription)
                         self.errorField.text = e.localizedDescription
                     } else{
+                        
+                        let docData: [String: Any] = [
+                            
+                            "email": email,
+                            "firstName" : self.firstNameField.text!,
+                            "lastName" : self.lastNameField.text!,
+                            "phoneNumber" : self.phoneNumberField.text!,
+                            "dateCreated" : self.myDate()
+
+                        ]
+                        ///guard let userID = Auth.auth().currentUser?.uid else {return}
+                        Global.db.collection("userData").document(Global.userID!).setData(docData){ err in
+                            if let err = err {
+                                print("Error writing document: \(err)")
+                            } else {
+                                print("Document successfully written!")
+                            }
+                        }
                         self.performSegue(withIdentifier: "RegisterToProfile", sender: self)
                     }
                 }
             }
-        
         }
     }
-    
 }

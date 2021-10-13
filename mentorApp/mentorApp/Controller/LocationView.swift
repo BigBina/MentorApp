@@ -7,8 +7,10 @@
 
 import UIKit
 import CoreLocation
+import Firebase
 
 class LocationView: UIViewController {
+    
     @IBOutlet weak var bioField: UITextView!
     @IBOutlet weak var cityField: UITextField!
     @IBOutlet weak var stateField: UITextField!
@@ -17,7 +19,6 @@ class LocationView: UIViewController {
     
     var pickerView = UIPickerView()
     let locationManager = CLLocationManager()
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,8 +32,6 @@ class LocationView: UIViewController {
         stateField.inputView = pickerView
         stateField.textAlignment = .center
         stateField.placeholder = "Select State"
-        stateField.delegate = self
-        cityField.delegate = self
         
         
         //Location Initializers
@@ -40,8 +39,6 @@ class LocationView: UIViewController {
         
         //Button Attributes
         nextButton.layer.cornerRadius = 20
-        
-     
         
     }
 
@@ -62,7 +59,22 @@ class LocationView: UIViewController {
     }
     @IBAction func nextButton(_ sender: Any) {
         if cityField.text != "" && stateField.text != ""{
+      
+            let docData: [String : Any] = [
+                "city" : cityField.text!,
+                "state" : stateField.text!
+            ]
+            
+            Global.db.collection("userData").document(Global.userID!).updateData(docData){ err in
+                if let err = err {
+                    print("Error writing document: \(err)")
+                } else {
+                    print("Document successfully written!")
+                }
+            }
+            
             performSegue(withIdentifier: "LocationToCategories", sender: self)
+            
         } else{
             errorLabel.text = "Please fill out required fields: City and State"
         }
@@ -90,15 +102,15 @@ extension LocationView: UIPickerViewDelegate, UIPickerViewDataSource{
     }
 
 }
-
-extension LocationView: CLLocationManagerDelegate, UITextFieldDelegate{
+//MARK: - Location Delegate with locationManager Methods
+extension LocationView: CLLocationManagerDelegate{
     @IBAction func liveLocationButton(_ sender: Any) {
         self.locationManager.requestWhenInUseAuthorization()
         self.locationManager.requestLocation()
-
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
         if let location = locations.last {
             self.locationManager.stopUpdatingLocation()
             let lat = location.coordinate.latitude
@@ -109,7 +121,6 @@ extension LocationView: CLLocationManagerDelegate, UITextFieldDelegate{
             geocoder.reverseGeocodeLocation(locationB) { (placemarks, error) in
                 self.processResponse(withPlacemarks: placemarks, error: error)
             }
-
         }
     }
 
@@ -117,7 +128,6 @@ extension LocationView: CLLocationManagerDelegate, UITextFieldDelegate{
         print(error.localizedDescription)
         print("Failed with Error")
     }
-
     
 }
 
