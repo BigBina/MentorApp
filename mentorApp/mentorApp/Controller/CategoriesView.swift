@@ -6,9 +6,9 @@
 //
 
 import UIKit
+import Firebase
 
 class CategoriesView: UIViewController {
-    
     
 
     @IBOutlet weak var careerTextField: UITextField!
@@ -29,8 +29,7 @@ class CategoriesView: UIViewController {
     //PickerView Instantiation
     var pickerView = UIPickerView()
     
-    var profile: Profile = Profile(firstName: "", lastName: "", phoneNumber: "", city: "", state: "", bio: "", type: "", categories: [], career: "")
-    
+    var reg = RegisterView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,6 +42,7 @@ class CategoriesView: UIViewController {
         
         //PickerView Attributes
         pickerViewAttributes()
+        
         //Initializing the buttonArray
         self.buttonArray = [self.fitnessButton, self.financialButton, self.jobButton, self.associatesButton, self.cultureButton]
     }
@@ -68,6 +68,7 @@ class CategoriesView: UIViewController {
         careerTextField.inputView = pickerView
         careerTextField.inputAccessoryView = toolBar
     }
+    
     //#selector has to refer to an objc function
     @objc func closePickerView(){
         view.endEditing(true)
@@ -168,19 +169,47 @@ class CategoriesView: UIViewController {
     
     //MARK: - Next Segue Check
     @IBAction func nextButton(_ sender: Any) {
+   
         for button in buttonArray{
             if button.isSelected == true{
                 //store it and next segue
-                if profile.categories.contains(button.currentTitle!){
+                if reg.profile.categories.contains(button.currentTitle!){
                     continue
                 } else {
-                    profile.categories.append(button.currentTitle!)
-                    print(profile.categories)
+                    reg.profile.categories.append(button.currentTitle!)
+                     Global.db.collection("userData").document(Global.userID!).updateData([
+                    
+                        "career" : careerTextField.text!,
+                        "categories" : FieldValue.arrayUnion([button.currentTitle!])
+                        
+                        ]){ err in
+                        if let err = err {
+                            print("Error updating document: \(err)")
+                        } else {
+                            print("Document successfully updated")
+                        }
+                    }
                 }
             } else{
-                continue
+                if reg.profile.categories.contains(button.currentTitle!){
+                    if let index = reg.profile.categories.firstIndex(of: button.currentTitle!){
+                        reg.profile.categories.remove(at: index)
+                    }
+                    Global.db.collection("userData").document(Global.userID!).updateData([
+                        "categories" : FieldValue.arrayRemove([button.currentTitle!])
+                    ]){ err in
+                        if let err = err {
+                            print("Error updating document: \(err)")
+                        } else {
+                            print("Document successfully updated")
+                        }
+                    }
+                } else{
+                    continue
+                }
             }
         }
+        
 //        performSegue(withIdentifier: <#T##String#>, sender: <#T##Any?#>)
     }
     
