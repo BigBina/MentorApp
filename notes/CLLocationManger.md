@@ -2,7 +2,7 @@
 attachments: [Screen Shot 2021-10-05 at 11.12.46 PM.png]
 title: CLLocationManger
 created: '2021-10-06T04:04:36.578Z'
-modified: '2021-10-09T15:32:00.716Z'
+modified: '2021-10-14T07:16:42.965Z'
 ---
 
 # CLLocationManger
@@ -17,9 +17,10 @@ You use instances of this class to configure, start, and stop the Core Location 
 - Reporting heading changes from the onboard compass.
 - Monitoring distinct regions of interest and generating location events when the user enters or leaves those regions.
 - Reporting the range to nearby beacons.
-
+### Privacy
 ![nf](@attachment/Screen Shot 2021-10-05 at 11.12.46 PM.png)
 
+***
 ## CLPlacemark 
 The CLPlacemark is an object that stores placemark data for a given lat and lon. Placemark data includes information such as the country or region, state, city, and street address associated with the specified coordinate. It can also include points of interest and geographically related data.
 
@@ -52,7 +53,7 @@ extension LocationView: CLLocationManagerDelegate, UITextFieldDelegate{
         }
     }
 ```
-This processRespone function is where you specify which Placemark attributes you would like to access from the CLLocation. Reference to all the possible attributes: [**CLPlacemark**](https://developer.apple.com/documentation/corelocation/clplacemark)
+This processRespone function is where you specify which Placemark attributes you would like to access from the CLLocation. Reference to all the possible attributes: [<mark>**CLPlacemark**</mark>](https://developer.apple.com/documentation/corelocation/clplacemark)
 In this function, I only requested the State and City of my current location. I also added a conditional if the fields are not filled out, then we prompt an error alert.
 
 ```swift
