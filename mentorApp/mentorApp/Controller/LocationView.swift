@@ -8,17 +8,23 @@
 import UIKit
 import CoreLocation
 import Firebase
+import FirebaseStorage
 
 class LocationView: UIViewController {
     
-    @IBOutlet weak var bioField: UITextView!
     @IBOutlet weak var cityField: UITextField!
     @IBOutlet weak var stateField: UITextField!
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var nextButton: UIButton!
+    @IBOutlet weak var imageView: UIImageView!
     
     var pickerView = UIPickerView()
     let locationManager = CLLocationManager()
+    
+    var image: UIImage? = nil
+    
+    let storageBucket : String = "gs://mentorapp-9a6b5.appspot.com/"
+ 
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,8 +37,6 @@ class LocationView: UIViewController {
         pickerView.dataSource = self
         stateField.inputView = pickerView
         stateField.textAlignment = .center
-        stateField.placeholder = "Select State"
-        
         
         //Location Initializers
         locationManager.delegate = self
@@ -40,6 +44,13 @@ class LocationView: UIViewController {
         //Button Attributes
         nextButton.layer.cornerRadius = 20
         
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(didTap))
+        imageView.addGestureRecognizer(gesture)
+    }
+    
+    
+    @objc private func didTap(){
+        presentPhotoActionSheet()
     }
 
     public func processResponse(withPlacemarks placemarks: [CLPlacemark]?, error: Error?) {
@@ -57,7 +68,51 @@ class LocationView: UIViewController {
             }
         }
     }
+  
     @IBAction func nextButton(_ sender: Any) {
+        //MARK: - Image Upload to Storage
+        let storage = Storage.storage()
+        let metadata = StorageMetadata()
+        
+        guard let imageSelected = self.image else{
+            print("Profile is nil")
+            return
+        }
+        
+        guard let imageData = imageSelected.jpegData(compressionQuality: 0.4) else { return}
+        
+        let storagePath = "\(storageBucket)"
+        let storageRef = storage.reference(forURL: storagePath)
+        
+        let imageRef = storageRef.child("images").child(Global.userID!)
+        
+        
+        metadata.contentType = "image/jpeg"
+        
+        imageRef.putData(imageData, metadata: metadata) { storageMetaData, error in
+            if error != nil{
+                print(error?.localizedDescription ?? "Yo")
+                return
+            }
+            
+            imageRef.downloadURL(completion: { (url, error) in
+                if let metaImageUrl = url?.absoluteString{
+                    print(metaImageUrl)
+                    Global.db.collection("userData").document(Global.userID!).updateData([
+                        "profile-image" : metaImageUrl
+                    ]) { err in
+                        if let err = err {
+                            print("Error writing document: \(err)")
+                        } else {
+                            print("Document successfully written!")
+                        }
+                        
+                    }
+                }
+            })
+        }
+        
+        //MARK: - City and State Update to Firestore
         if cityField.text != "" && stateField.text != ""{
       
             let docData: [String : Any] = [
@@ -75,11 +130,10 @@ class LocationView: UIViewController {
             
             performSegue(withIdentifier: "LocationToCategories", sender: self)
             
-        } else{
+        } else {
             errorLabel.text = "Please fill out required fields: City and State"
         }
     }
-    
 }
 
 //MARK: - Picker View for the State Selection
@@ -131,3 +185,51 @@ extension LocationView: CLLocationManagerDelegate{
     
 }
 
+extension LocationView: UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+    
+    func presentPhotoActionSheet(){
+        let actionSheet = UIAlertController(title: "Profile Picture", message: "How would you like to select a photo?", preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "cancel", style: .cancel, handler: nil))
+        actionSheet.addAction(UIAlertAction(title: "Take Photo", style: .default, handler:{ [weak self] _ in
+            self?.presentCamera()
+        } ))
+        actionSheet.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler:{ [weak self] _ in
+            // so that a memory retention loop isn't created. And self becomes optional since its weak.
+            self?.presentPhotoPicker()
+            
+        }))
+
+        present(actionSheet, animated: true)
+    }
+    
+    func presentCamera(){
+        let vc = UIImagePickerController()
+        vc.sourceType = .camera
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true)
+    }
+
+    
+    func presentPhotoPicker(){
+        let vc = UIImagePickerController()
+        vc.sourceType = .photoLibrary
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true)
+    }
+
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        
+        if let selectedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage{
+            image = selectedImage
+            self.imageView.image = selectedImage
+        }
+        
+    }
+}
