@@ -100,13 +100,22 @@ class RegisterView: UIViewController {
  
         if let email = emailAddressField.text, let password = passwordField.text{
             if confirmPasswordField.text != passwordField.text {
-                errorField.text = "Error: Passwords do not match"
+                
+                let alert = UIAlertController(title: "Error", message: "Passwords do not match", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+                self.present(alert, animated: true, completion: nil)
+                
             } else{
                 Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
                     if let e = error{
+                        
                         print(e.localizedDescription)
-                        self.errorField.text = e.localizedDescription
+                        let alert = UIAlertController(title: "Error", message: e.localizedDescription, preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+                        self.present(alert, animated: true, completion: nil)
+                        
                     } else{
+                        
                         self.profile.firstName = self.firstNameField.text!
                         
                         let docData: [String: Any] = [
