@@ -6,29 +6,40 @@
 //
 
 import UIKit
+import Firebase
 
 class LoginView: UIViewController {
 
+    @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var passwordTextField: UITextField!
     override func viewDidLoad() {
         super.viewDidLoad()
         hideKeyboardWhenTappedAround()
         // Do any additional setup after loading the view.
+        self.emailTextField.delegate = self
+        self.passwordTextField.delegate = self
     }
     
     
     
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    @IBAction func loginPressed(_ sender: Any) {
+        if let email = emailTextField.text, let password = passwordTextField.text {
+            Auth.auth().signIn(withEmail: email, password: password) {  authResult, error in
+              //guard let self = self else { return }
+                if let e = error
+                {
+                    print(e.localizedDescription)
+                } else{
+                    self.performSegue(withIdentifier: "LoginToHome", sender: self)
+                }
+            }
+        }
     }
-    */
+    
 
 }
+
 
 extension UIViewController {
     func hideKeyboardWhenTappedAround() {
@@ -39,5 +50,13 @@ extension UIViewController {
     
     @objc func dismissKeyboard() {
         view.endEditing(true)
+    }
+}
+
+extension LoginView : UITextFieldDelegate {
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        emailTextField.endEditing(true)
+        passwordTextField.endEditing(true)
+        return true
     }
 }
