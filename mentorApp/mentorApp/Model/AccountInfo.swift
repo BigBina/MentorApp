@@ -13,9 +13,9 @@ public struct Profile {
     var phoneNumber : String?
     var city : String?
     var state : String?
-    let bio : String
+    var bio : String?
     // Mentor or mentee
-    let type : String
+    var type : String
     // All selected will from categories page will be here
     var categories : [String]
 //    var interest : [String]

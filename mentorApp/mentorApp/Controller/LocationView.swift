@@ -17,6 +17,7 @@ class LocationView: UIViewController {
     @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var nextButton: UIButton!
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var bioField: UITextField!
     
     var pickerView = UIPickerView()
     let locationManager = CLLocationManager()
@@ -117,7 +118,8 @@ class LocationView: UIViewController {
       
             let docData: [String : Any] = [
                 "city" : cityField.text!,
-                "state" : stateField.text!
+                "state" : stateField.text!,
+                "bio" : bioField.text!
             ]
             
             Global.db.collection("userData").document(Global.userID!).updateData(docData){ err in
