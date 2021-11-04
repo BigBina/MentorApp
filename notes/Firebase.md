@@ -2,7 +2,7 @@
 attachments: [Screen Shot 2021-09-28 at 10.01.03 AM.png, Screen Shot 2021-09-28 at 11.02.11 AM.png]
 title: Firebase
 created: '2021-09-27T18:08:53.291Z'
-modified: '2021-10-14T07:16:08.954Z'
+modified: '2021-11-01T20:13:50.114Z'
 ---
 
 # Firebase
@@ -116,4 +116,83 @@ The code below denotes the button as being deselcted. The first line checks to s
 ```
 ***
 ## [<mark>Storage</mark>](https://firebase.google.com/docs/storage/ios/start)
+This is the [<mark>upload</mark>](https://firebase.google.com/docs/storage/ios/upload-files) portion of profile pictures to the database. In-message photos not included. Here, I grab the imageData and reference it to the storage, push the image data and metaData, and sets the storage URL to the Firestore base to later retrieve the link in the Homepage View.
+```swift
+  let storageBucket : String = "gs://mentorapp-9a6b5.appspot.com/"
+  let storage = Storage.storage()
+  let metadata = StorageMetadata()
+
+  guard let imageSelected = self.image else{
+      print("Profile is nil")
+      return
+  }
+
+  guard let imageData = imageSelected.jpegData(compressionQuality: 0.4) else { return}
+
+  let storagePath = "\(storageBucket)"
+  let storageRef = storage.reference(forURL: storagePath)
+
+  let imageRef = storageRef.child("images").child(Global.userID!)
+
+
+  metadata.contentType = "image/jpeg"
+
+  imageRef.putData(imageData, metadata: metadata) { storageMetaData, error in
+      if error != nil{
+          print(error?.localizedDescription ?? "Yo")
+          return
+      }
+      
+      imageRef.downloadURL(completion: { (url, error) in
+          if let metaImageUrl = url?.absoluteString{
+              print(metaImageUrl)
+              Global.db.collection("userData").document(Global.userID!).updateData([
+                  "profile-image" : metaImageUrl
+              ]) { err in
+                  if let err = err {
+                      print("Error writing document: \(err)")
+                  } else {
+                      print("Document successfully written!")
+                  }
+                  
+              }
+          }
+      })
+```
+
+***
+## [<mark>Queries</mark>](https://firebase.google.com/docs/firestore/query-data/queries)
+
+In this code snippet that I used in the mentorApp's HomepageView, I access the docData that we added to database from the registration portal. The closure gets the documents based on the query parameters that is initialized above. Here we set the dictionary value of the corresponding key (string). `data` allows us to do so by providing the dictonary. sd_setImage is function that is imported from `FirebaseStorageUI`. This is not included with Firebase so added FirebaseStorageUI in the Pods file will do the trick. 
+
+```swift
+let typeRef = Global.db.collection("userData")
+let query = typeRef.whereField("type", isEqualTo: "Mentor")
+
+query.getDocuments { querySnapshot, err in
+
+  if let document = querySnapshot?.documents[self.docArrayStart]{
+    let data = document.data()
+
+    if let firstN = data["firstName"] as? String,
+        let lastN = data["lastName"] as? String,
+        let categories = data["categories"] as? [String],
+        let career = data["career"] as? String,
+        let pic = data["profile-image"] as? String
+    {
+        let storageRef = Storage.storage().reference(forURL: pic)
+        self.profilePicture.sd_setImage(with: storageRef, placeholderImage: UIImage(named: "\(Global.userID!).png"))
+        self.firstNameLabel.text = "\(firstN) \(lastN)"
+        self.careerLabel.text = career
+        
+        for category in categories {
+            self.listOfCategories.text! += "\(category)\n"
+        }
+      }
+   }
+}
+
+```
+
+
 
