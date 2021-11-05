@@ -12,6 +12,7 @@ class LoginView: UIViewController {
 
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         hideKeyboardWhenTappedAround()
@@ -20,24 +21,29 @@ class LoginView: UIViewController {
         self.passwordTextField.delegate = self
     }
     
-    
+    var check : Bool = false
     
 
-    @IBAction func loginPressed(_ sender: Any) {
+    @IBAction func loginPressed(_ sender: UIButton) {
         if let email = emailTextField.text, let password = passwordTextField.text {
-            Auth.auth().signIn(withEmail: email, password: password) {  authResult, error in
-              //guard let self = self else { return }
-                if let e = error
-                {
+            Auth.auth().signIn(withEmail: email, password: password) { [weak self] authResult, error in
+              guard let self = self else { return }
+                
+                if let e = error {
+                    let alert = UIAlertController(title: "Error", message: e.localizedDescription, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
                     print(e.localizedDescription)
                 } else{
-                    self.performSegue(withIdentifier: "LoginToHome", sender: self)
-                }
+                    if(self.check == false){
+                        self.performSegue(withIdentifier: "LoginToHome", sender: self)
+                    }
+                    self.check = true
+                }                
             }
         }
     }
     
-
 }
 
 
