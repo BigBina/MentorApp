@@ -39,8 +39,8 @@ class RegisterView: UIViewController {
         let dateFormatter = DateFormatter()
         let currentDate = Date()
         dateFormatter.dateFormat = "h:mm a - MM/d/yy"
-        let jDate = dateFormatter.string(from: currentDate)
-        return jDate
+        let formattedDate = dateFormatter.string(from: currentDate)
+        return formattedDate
     }
     
     func buttonProperties(){
@@ -49,6 +49,7 @@ class RegisterView: UIViewController {
         mentorButton.layer.cornerRadius = 20
     }
     
+    //MARK: - Button Selectors
     @IBAction func menteeButton(_ sender: UIButton) {
         if menteeButton.isSelected == false{
             menteeButton.isSelected = true
@@ -84,12 +85,10 @@ class RegisterView: UIViewController {
             //remove it from the profile struct
             print("Not highlighted")
         }
-        
-        
 
     }
 
-    
+    //MARK: - Registration Portion w/ Firestore
     @IBAction func nextButton(_ sender: Any) {
         
         for button in buttonArray{
@@ -105,7 +104,7 @@ class RegisterView: UIViewController {
                 alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
                 self.present(alert, animated: true, completion: nil)
                 
-            } else{
+            } else {
                 Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
                     if let e = error{
                         
@@ -114,23 +113,23 @@ class RegisterView: UIViewController {
                         alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
                         self.present(alert, animated: true, completion: nil)
                         
-                    } else{
+                    } else {
                         
                         self.profile.firstName = self.firstNameField.text!
                         
                         let docData: [String: Any] = [
                             
-                            "filterDate": Date().timeIntervalSince1970,
-                            "email": email,
-                            "firstName" : self.firstNameField.text!,
-                            "lastName" : self.lastNameField.text!,
-                            "phoneNumber" : self.phoneNumberField.text!,
-                            "dateCreated" : self.myDate(),
-                            "type" : self.profile.type
+                            Constants.QueryKey.Filter         : Date().timeIntervalSince1970,
+                            Constants.QueryKey.Email          : email,
+                            Constants.QueryKey.FirstName      : self.firstNameField.text!,
+                            Constants.QueryKey.LastName       : self.lastNameField.text!,
+                            Constants.QueryKey.Phone          : self.phoneNumberField.text!,
+                            Constants.QueryKey.Date           : self.myDate(),
+                            Constants.QueryKey.MentorshipType : self.profile.type
 
                         ]
                         ///guard let userID = Auth.auth().currentUser?.uid else {return}
-                        Global.db.collection("userData").document(Global.userID!).setData(docData){ err in
+                        Global.db.collection(Constants.FB.userData).document(Global.userID!).setData(docData){ err in
                             if let err = err {
                                 print("Error writing document: \(err)")
                             } else {

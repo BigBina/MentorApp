@@ -83,6 +83,13 @@ class CategoriesView: UIViewController {
         nextButton.layer.cornerRadius = 20
     }
     
+    fileprivate func errorFunc(_ err: Error?) {
+        if let err = err {
+            print("Error updating document: \(err)")
+        } else {
+            print("Document successfully updated")
+        }
+    }
     
     
 //MARK: - Button Selectors
@@ -167,7 +174,7 @@ class CategoriesView: UIViewController {
         }
     }
     
-    //MARK: - Next Segue Check
+    //MARK: - Appending Categories and Adding Career in Firestore
     @IBAction func nextButton(_ sender: Any) {
    
         for button in buttonArray{
@@ -177,46 +184,35 @@ class CategoriesView: UIViewController {
                     continue
                 } else {
                     reg.profile.categories.append(button.currentTitle!)
-                     Global.db.collection("userData").document(Global.userID!).updateData([
+                     Global.db.collection(Constants.FB.userData).document(Global.userID!).updateData([
                     
-                        "career" : careerTextField.text!,
-                        "categories" : FieldValue.arrayUnion([button.currentTitle!])
+                        Constants.QueryKey.Career : careerTextField.text!,
+                        Constants.QueryKey.Categories : FieldValue.arrayUnion([button.currentTitle!])
                         
                         ]){ err in
-                        if let err = err {
-                            print("Error updating document: \(err)")
-                        } else {
-                            print("Document successfully updated")
-                        }
+                        self.errorFunc(err)
                     }
                 }
-            } else{
+            } else {
                 if reg.profile.categories.contains(button.currentTitle!){
                     if let index = reg.profile.categories.firstIndex(of: button.currentTitle!){
                         reg.profile.categories.remove(at: index)
                     }
-                    Global.db.collection("userData").document(Global.userID!).updateData([
-                        "categories" : FieldValue.arrayRemove([button.currentTitle!])
+                    Global.db.collection(Constants.FB.userData).document(Global.userID!).updateData([
+                        Constants.QueryKey.Categories : FieldValue.arrayRemove([button.currentTitle!])
                     ]){ err in
-                        if let err = err {
-                            print("Error updating document: \(err)")
-                        } else {
-                            print("Document successfully updated")
-                        }
+                        self.errorFunc(err)
                     }
-                } else{
+                } else {
                     continue
                 }
             }
         }
-        
-//        performSegue(withIdentifier: <#T##String#>, sender: <#T##Any?#>)
     }
     
-    
-    
 }
-// once im in the next button, loop through the button array and check if the selected is true. If true set it to the categories array
+
+/// once im in the next button, loop through the button array and check if the selected is true. If true set it to the categories array
 //MARK: - Picker View for the Career Field
 extension CategoriesView: UIPickerViewDelegate, UIPickerViewDataSource{
     
@@ -236,10 +232,5 @@ extension CategoriesView: UIPickerViewDelegate, UIPickerViewDataSource{
         careerTextField.text = careerCategories[row]
 //        careerTextField.resignFirstResponder()
     }
-    
-    
-
 
 }
-
-

@@ -54,6 +54,7 @@ class LocationView: UIViewController {
         presentPhotoActionSheet()
     }
 
+    ///Location function to convert geolaction to user friendly names such as City and State.
     public func processResponse(withPlacemarks placemarks: [CLPlacemark]?, error: Error?) {
         // Update View
 
@@ -70,8 +71,16 @@ class LocationView: UIViewController {
         }
     }
   
+    fileprivate func errorFunc(_ err: Error?) {
+        if let err = err {
+            print("Error writing document: \(err)")
+        } else {
+            print("Document successfully written!")
+        }
+    }
+    
     @IBAction func nextButton(_ sender: Any) {
-        //MARK: - Image Upload to Storage
+        //MARK: - Image Upload to FB Storage & Link Reference to Firestore
         let storage = Storage.storage()
         let metadata = StorageMetadata()
         
@@ -99,15 +108,10 @@ class LocationView: UIViewController {
             imageRef.downloadURL(completion: { (url, error) in
                 if let metaImageUrl = url?.absoluteString{
                     print(metaImageUrl)
-                    Global.db.collection("userData").document(Global.userID!).updateData([
-                        "profile-image" : metaImageUrl
+                    Global.db.collection(Constants.FB.userData).document(Global.userID!).updateData([
+                        Constants.QueryKey.Picture : metaImageUrl
                     ]) { err in
-                        if let err = err {
-                            print("Error writing document: \(err)")
-                        } else {
-                            print("Document successfully written!")
-                        }
-                        
+                        self.errorFunc(err)
                     }
                 }
             })
@@ -117,17 +121,13 @@ class LocationView: UIViewController {
         if cityField.text != "" && stateField.text != ""{
       
             let docData: [String : Any] = [
-                "city" : cityField.text!,
-                "state" : stateField.text!,
-                "bio" : bioField.text!
+                Constants.QueryKey.City : cityField.text!,
+                Constants.QueryKey.State : stateField.text!,
+                Constants.QueryKey.Bio : bioField.text!
             ]
             
-            Global.db.collection("userData").document(Global.userID!).updateData(docData){ err in
-                if let err = err {
-                    print("Error writing document: \(err)")
-                } else {
-                    print("Document successfully written!")
-                }
+            Global.db.collection(Constants.FB.userData).document(Global.userID!).updateData(docData){ err in
+                self.errorFunc(err)
             }
             
             performSegue(withIdentifier: "LocationToCategories", sender: self)
@@ -186,7 +186,7 @@ extension LocationView: CLLocationManagerDelegate{
     }
     
 }
-
+//MARK: - UI Image Delegates for Selecting & Editing Photos
 extension LocationView: UIImagePickerControllerDelegate, UINavigationControllerDelegate{
     
     func presentPhotoActionSheet(){

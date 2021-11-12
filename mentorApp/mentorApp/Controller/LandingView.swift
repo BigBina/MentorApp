@@ -15,17 +15,29 @@ class LandingView: UIViewController {
     @IBOutlet weak var appleViewButton: UIStackView!
     @IBOutlet weak var loginButton: UIButton!
     @IBOutlet weak var registerButton: UIButton!
+    
     private let sign = ASAuthorizationAppleIDButton()
+    
+    fileprivate var currentNonce: String? /// ASAuth
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
         buttonProperties()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         sign.frame = CGRect(x: 0, y: 0, width: 250, height: 50)
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
     func buttonProperties(){
@@ -38,45 +50,9 @@ class LandingView: UIViewController {
         loginButton.layer.cornerRadius = 20
         
     }
-    
-
-    fileprivate var currentNonce: String?
-    @objc func didTapSignIn(){
-        let nonce = randomNonceString()
-        currentNonce = nonce
-        let provider = ASAuthorizationAppleIDProvider()
-        let request = provider.createRequest()
-        request.requestedScopes = [.fullName, .email]
-        request.nonce = sha256(nonce)
-        
-        let controller = ASAuthorizationController(authorizationRequests: [request])
-        controller.delegate = self
-        controller.presentationContextProvider = self
-        controller.performRequests()
-    }
-    
-    private func sha256(_ input: String) -> String {
-      let inputData = Data(input.utf8)
-      let hashedData = SHA256.hash(data: inputData)
-      let hashString = hashedData.compactMap {
-        return String(format: "%02x", $0)
-      }.joined()
-        return hashString
-        
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: animated)
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-    }
 
 }
-//MARK: - Apple Authorization
+//MARK: - Apple Authorization - SIWA
 extension LandingView: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         print("Woah")
@@ -125,6 +101,7 @@ extension LandingView: ASAuthorizationControllerDelegate {
         }
     
     }
+    /// 1 of 3 Functions needed for ASAuth
     private func randomNonceString(length: Int = 32) -> String {
       precondition(length > 0)
       let charset: Array<Character> =
@@ -156,6 +133,33 @@ extension LandingView: ASAuthorizationControllerDelegate {
 
       return result
     }
+    
+    /// 2 of 3 Functions needed for ASAuth
+    @objc func didTapSignIn(){
+        let nonce = randomNonceString()
+        currentNonce = nonce
+        let provider = ASAuthorizationAppleIDProvider()
+        let request = provider.createRequest()
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = sha256(nonce)
+        
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        controller.performRequests()
+    }
+    
+    /// 3 of 3 Functions needed for ASAuth
+    private func sha256(_ input: String) -> String {
+      let inputData = Data(input.utf8)
+      let hashedData = SHA256.hash(data: inputData)
+      let hashString = hashedData.compactMap {
+        return String(format: "%02x", $0)
+      }.joined()
+        return hashString
+        
+    }
+
 }
 
 extension LandingView: ASAuthorizationControllerPresentationContextProviding {
@@ -164,4 +168,3 @@ extension LandingView: ASAuthorizationControllerPresentationContextProviding {
     }
     
 }
-
