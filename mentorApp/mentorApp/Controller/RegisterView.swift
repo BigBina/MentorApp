@@ -32,8 +32,6 @@ class RegisterView: UIViewController {
         self.buttonArray = [self.menteeButton, self.mentorButton]
     }
 
- 
-    var profile : Profile = Profile(firstName: "", lastName: "", phoneNumber: "", city: "", state: "", bio: "", type: "", career: "", categories: [])
     
     private func myDate() -> String{
         let dateFormatter = DateFormatter()
@@ -93,7 +91,7 @@ class RegisterView: UIViewController {
         
         for button in buttonArray{
             if button.isSelected == true{
-                profile.type = button.currentTitle!
+                Global.profile.type = button.currentTitle!
             }
         }
  
@@ -115,7 +113,10 @@ class RegisterView: UIViewController {
                         
                     } else {
                         
-                        self.profile.firstName = self.firstNameField.text!
+                        Global.profile.firstName = self.firstNameField.text!
+                        Global.profile.lastName = self.lastNameField.text!
+                        Global.displayName = "\(Global.profile.firstName!) \(Global.profile.lastName!)"
+                        Global.profile.email = email
                         
                         let docData: [String: Any] = [
                             
@@ -125,7 +126,7 @@ class RegisterView: UIViewController {
                             Constants.QueryKey.LastName       : self.lastNameField.text!,
                             Constants.QueryKey.Phone          : self.phoneNumberField.text!,
                             Constants.QueryKey.Date           : self.myDate(),
-                            Constants.QueryKey.MentorshipType : self.profile.type
+                            Constants.QueryKey.MentorshipType : Global.profile.type
 
                         ]
                         ///guard let userID = Auth.auth().currentUser?.uid else {return}

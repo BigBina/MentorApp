@@ -23,7 +23,7 @@ class LoginView: UIViewController {
     
     var check : Bool = false
     
-
+    //MARK: - FB Login Method
     @IBAction func loginPressed(_ sender: UIButton) {
         if let email = emailTextField.text, let password = passwordTextField.text {
             Auth.auth().signIn(withEmail: email, password: password) { [weak self] authResult, error in
@@ -36,6 +36,8 @@ class LoginView: UIViewController {
                     print(e.localizedDescription)
                 } else{
                     if(self.check == false){
+                        Global.profile.firstName = "Brandon"
+                        Global.profile.email = email
                         self.performSegue(withIdentifier: "LoginToHome", sender: self)
                     }
                     self.check = true

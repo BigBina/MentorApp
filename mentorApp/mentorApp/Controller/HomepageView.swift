@@ -22,9 +22,6 @@ class HomepageView: UIViewController {
     @IBOutlet weak var denyButton: UIButton!
     @IBOutlet weak var acceptButton: UIButton!
     
-    let defaults = UserDefaults.standard
-    let user = Firebase.Auth.auth().currentUser
-    let bop = Global.db.collection(Constants.FB.userData)
     let query = Global.db.collection(Constants.FB.userData).whereField(Constants.QueryKey.MentorshipType, isEqualTo: "Mentor")
     
     var docArrayStart = 0
@@ -107,7 +104,7 @@ class HomepageView: UIViewController {
     
     @IBAction func acceptAction(_ sender: Any) {
         Global.db.collection(Constants.FB.userData).document(Global.userID!).updateData([
-            Constants.QueryKey.Connections : FieldValue.arrayUnion([self.mentor.email])
+            Constants.QueryKey.Connections : FieldValue.arrayUnion([self.mentor.email!])
         ]){ err in
             self.errorFunc(err)
         }

@@ -25,6 +25,7 @@ class LocationView: UIViewController {
     var image: UIImage? = nil
     
     let storageBucket : String = "gs://mentorapp-9a6b5.appspot.com/"
+    
  
     
     override func viewDidLoad() {
@@ -113,12 +114,13 @@ class LocationView: UIViewController {
                     ]) { err in
                         self.errorFunc(err)
                     }
+                    Global.profile.picture = metaImageUrl
                 }
             })
         }
         
         //MARK: - City and State Update to Firestore
-        if cityField.text != "" && stateField.text != ""{
+        if cityField.text != "" && stateField.text != "" {
       
             let docData: [String : Any] = [
                 Constants.QueryKey.City : cityField.text!,
@@ -139,7 +141,7 @@ class LocationView: UIViewController {
 }
 
 //MARK: - Picker View for the State Selection
-extension LocationView: UIPickerViewDelegate, UIPickerViewDataSource{
+extension LocationView: UIPickerViewDelegate, UIPickerViewDataSource {
 
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
@@ -159,7 +161,7 @@ extension LocationView: UIPickerViewDelegate, UIPickerViewDataSource{
 
 }
 //MARK: - Location Delegate with locationManager Methods
-extension LocationView: CLLocationManagerDelegate{
+extension LocationView: CLLocationManagerDelegate {
     @IBAction func liveLocationButton(_ sender: Any) {
         self.locationManager.requestWhenInUseAuthorization()
         self.locationManager.requestLocation()
@@ -187,7 +189,7 @@ extension LocationView: CLLocationManagerDelegate{
     
 }
 //MARK: - UI Image Delegates for Selecting & Editing Photos
-extension LocationView: UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+extension LocationView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     func presentPhotoActionSheet(){
         let actionSheet = UIAlertController(title: "Profile Picture", message: "How would you like to select a photo?", preferredStyle: .actionSheet)
@@ -231,6 +233,7 @@ extension LocationView: UIImagePickerControllerDelegate, UINavigationControllerD
         if let selectedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage{
             image = selectedImage
             self.imageView.image = selectedImage
+           
         }
         
     }

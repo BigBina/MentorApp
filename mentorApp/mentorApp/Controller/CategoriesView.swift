@@ -29,8 +29,6 @@ class CategoriesView: UIViewController {
     //PickerView Instantiation
     var pickerView = UIPickerView()
     
-    var reg = RegisterView()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -180,11 +178,11 @@ class CategoriesView: UIViewController {
         for button in buttonArray{
             if button.isSelected == true{
                 //store it and next segue
-                if reg.profile.categories.contains(button.currentTitle!){
+                if Global.profile.categories.contains(button.currentTitle!){
                     continue
                 } else {
-                    reg.profile.categories.append(button.currentTitle!)
-                     Global.db.collection(Constants.FB.userData).document(Global.userID!).updateData([
+                    Global.profile.categories.append(button.currentTitle!)
+                    Global.db.collection(Constants.FB.userData).document(Global.userID!).updateData([
                     
                         Constants.QueryKey.Career : careerTextField.text!,
                         Constants.QueryKey.Categories : FieldValue.arrayUnion([button.currentTitle!])
@@ -194,9 +192,9 @@ class CategoriesView: UIViewController {
                     }
                 }
             } else {
-                if reg.profile.categories.contains(button.currentTitle!){
-                    if let index = reg.profile.categories.firstIndex(of: button.currentTitle!){
-                        reg.profile.categories.remove(at: index)
+                if Global.profile.categories.contains(button.currentTitle!){
+                    if let index = Global.profile.categories.firstIndex(of: button.currentTitle!){
+                        Global.profile.categories.remove(at: index)
                     }
                     Global.db.collection(Constants.FB.userData).document(Global.userID!).updateData([
                         Constants.QueryKey.Categories : FieldValue.arrayRemove([button.currentTitle!])
