@@ -14,5 +14,6 @@ class Global: NSObject {
     static let userEmail = Auth.auth().currentUser?.email
     static var displayName = Auth.auth().currentUser?.displayName
     
-    static var profile : Profile = Profile(firstName: "", lastName: "", phoneNumber: "", city: "", state: "", bio: "", type: "", career: "", categories: [""])
+    static var profile : Profile = Profile(firstName: "", lastName: "", phoneNumber: "", city: "", state: "", bio: "", email: "", type: "", career: "", categories: [""], picture: "")
+    static var MentorProf : MentorProfile = MentorProfile(firstName: "", lastName: "", email: "", city: "", state: "", bio: "", categories: [""], career: "", picture: nil)
 }

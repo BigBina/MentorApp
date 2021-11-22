@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import UIKit
 
-struct MentorProfile {
+struct MentorProfile: Equatable {
     var firstName : String?
     var lastName : String?
-    var email : String
+    var email : String?
     var city : String?
     var state : String?
     var bio : String
@@ -20,4 +21,10 @@ struct MentorProfile {
 //    var interest : [String]
     // This is seperate. Only choose 1 from the picker view.
     var career : String
+    
+    var picture : UIImage?
+    
+    static func == (storedConnection: MentorProfile, newConnection: MentorProfile) -> Bool {
+        return storedConnection.email == newConnection.email
+    }
 }
