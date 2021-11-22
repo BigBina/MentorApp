@@ -12,7 +12,8 @@ struct Constants {
         static let userData = "userData"
     }
     
-    struct QueryKey{
+    struct QueryKey {
+        
         static let MentorshipType = "type"
         static let FirstName = "firstName"
         static let LastName = "lastName"
@@ -28,5 +29,28 @@ struct Constants {
         static let Connections = "connections"
         static let Phone = "phoneNumber"
         static let Filter = "filterDate"
+        
+        static let Conversations = "conversations"
+        static let ConversationID = "conversation_id"
+        static let MessageID = "message_id"
+        static let OtherEmail = "other_user_email"
+        static let Name = "name"
+        static let MessageType = "message_type"
+        static let LatestMessage = "latest_message"
+        static let Content = "content"
+        static let DateOf = "date"
+        static let LastMessage = "last_message"
+        static let IsRead = "is_read"
+        static let SenderEmail = "sender_email"
+        
+    }
+    
+    
+    static func safeEmail(emailAdress: String) -> String {
+        var safeEmail = emailAdress.replacingOccurrences(of: ".", with: "-")
+        safeEmail = safeEmail.replacingOccurrences(of: "@", with: "-")
+        return safeEmail
     }
 }
+
+
