@@ -15,7 +15,9 @@ class MessagesView: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     
     var imgView = UIImageView()
+    var completion: ((MentorProfile) -> (Void))?
     
+    private var conversations = [Conversation]()
  
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,15 +27,57 @@ class MessagesView: UIViewController {
         tableView.dataSource = self
         
         grabArrayFunc()
+        listenToConversations()
         
     }
     
     var connections : [MentorProfile] = []
     var connect : [String] = []
-    
     let arr = Global.db.collection(Constants.FB.userData).document(Global.userID!)
     
-    func grabArrayFunc (){
+    private func completionFunc(){
+        completion = { [weak self] result in
+            print("This is the result from the completion: \(result)")
+            self?.createNewConvco(result: result)
+        }
+    }
+    
+    private func listenToConversations (){
+        DatabaseManager.shared.getAllCoversations(for: Global.userID!, completion: { [weak self] result in
+            switch result {
+            case .success(let conversations):
+                guard !conversations.isEmpty else {
+                    print("Yo sum not right")
+                    return
+                    
+                }
+                
+                print("gets here")
+                self?.conversations = conversations
+                
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
+            case .failure(let error):
+                print("fail: \(error)")
+            }
+        })
+    }
+    
+    
+    private func createNewConvco(result: MentorProfile){
+        guard let fName = result.firstName, let lName = result.lastName, let email = result.email else {return}
+        
+        let vc = ConversationsView(with: email, convo_id: nil)
+        vc.isNewConversation = true
+        //Go back and make the mentor profile a global function
+        vc.title = "\(fName) \(lName)"
+        vc.navigationItem.largeTitleDisplayMode = .never
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+  
+    func grabArrayFunc() {
         
         self.connect = []
         
@@ -68,8 +112,6 @@ class MessagesView: UIViewController {
             self.connections = []
             query.addSnapshotListener { querySnapshot, error in
                 
-                
-            
                 if let e = error {
                     print("There was an issue retrieving data from Firestore \(e)")
                 } else{
@@ -92,16 +134,10 @@ class MessagesView: UIViewController {
                                 let newConnection = MentorProfile(firstName: connectionFirstName, lastName: connectionLastName, email: connectionEmail, city: "", state: "", bio: "", categories: [""], career: "", picture: self.imgView.image)
                                 
                                 self.connections.append(newConnection)
-                           
 
-                               
-                                
-                                //updating table view
                                 DispatchQueue.main.async {
                                     self.tableView.reloadData()
-                                    //This is how we keep the most recent message alligned with the textField, instead of scrolling to the mosrt recent
-                               
-                                }
+                               }
                             } else {
                                 print("This aint working playboy")
                             }
@@ -114,7 +150,7 @@ class MessagesView: UIViewController {
 
 
 }
-
+//MARK: - Messages TableView
 extension MessagesView: UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -137,11 +173,23 @@ extension MessagesView: UITableViewDelegate, UITableViewDataSource{
         cell.nameLabel?.text = "\(connection.firstName!) \(connection.lastName!)"
         cell.profileImage.image = connection.picture
         cell.recentMessage.text = "Start a conversation..."
+
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        let model = conversations[indexPath.row]
+        let vc = ConversationsView(with: model.otherUserEmail, convo_id: model.id)
+        completionFunc()
+        vc.title = model.name
+        let targetUser = connections[indexPath.row]
+        
+        dismiss(animated: true, completion: { [weak self] in
+            self?.completion?(targetUser)
+        })
+        
     }
     
 }
